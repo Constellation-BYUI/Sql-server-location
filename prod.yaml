@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sql-server-confluence-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sql-server-confluence-prod
+  template:
+    metadata:
+      labels:
+        app: sql-server-confluence-prod
+    spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+      - name: sql-server-confluence-prod
+        image: gcr.io/constellation-275522/sql-server-confluence
+        ports:
+        - containerPort: 1433
+          name: sql-server
+        env:
+        - name: MSSQL_PID
+          value: "Express"
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-server-confluence-prod
+              key: SA_PASSWORD
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2000Mi"
+          requests:
+            cpu: "2"
+            memory: "2000Mi"
+        volumeMounts:
+        - name: sql-server-confluence-prod
+          mountPath: /var/opt/mssql
+        livenessProbe:
+          tcpSocket:
+            port: 1433
+          initialDelaySeconds: 300
+          periodSeconds: 30
+        securityContext:
+          privileged: true
+      volumes:
+      - name: sql-server-confluence-prod
+        persistentVolumeClaim:
+          claimName: sql-server-confluence-prod
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sql-server-confluence-prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi            
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sql-server-confluence-prod
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+  labels:
+    app: sql-server-confluence-prod
+spec:
+  ports:
+  - port: 1433
+    name: sql-server-confluence-prod
+  selector:
+    app: sql-server-confluence-prod
+  type: LoadBalancer  
+   
