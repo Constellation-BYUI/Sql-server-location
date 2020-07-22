@@ -1,21 +1,4 @@
 steps:
-# This step builds the container image.
-- name: 'gcr.io/cloud-builders/docker'
-  id: Build
-  args:
-    - 'build'
-    - '-t'
-    - 'gcr.io/$PROJECT_ID/sql-server-confluence:$SHORT_SHA'
-    - '.'
-  
-# This step pushes the image to Container Registry
-# The PROJECT_ID and SHORT_SHA variables are automatically
-# replaced by Cloud Build.
-- name: 'gcr.io/cloud-builders/docker'
-  id: Push
-  args:
-    - 'push'
-    - 'gcr.io/$PROJECT_ID/sql-server-confluence:$SHORT_SHA'
 
 # This step stops the database pod
 - name: 'gcr.io/cloud-builders/kubectl'
@@ -23,19 +6,19 @@ steps:
   args:
     - 'scale'
     - 'deploy'
-    - 'sql-server-confluence-test'
+    - 'sql-server-confluence-prod'
     - '--replicas=0'
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
     - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'  
 
-# This step deploys to the Stage environment
+# This step deploys to the Prod environment
 - name: 'gcr.io/cloud-builders/gke-deploy'
-  id: Deploy Test
+  id: Deploy Prod
   args:
   - run
   - --filename=test.yaml
-  - --image=gcr.io/$PROJECT_ID/sql-server-confluence:$SHORT_SHA
+  - --image=gcr.io/$PROJECT_ID/sql-server-confluence:$_SHORT_SHA
   - --output=/tmp/outputstage
   - --location=us-east1-b
   - --cluster=cluster-1  
@@ -46,20 +29,8 @@ steps:
   args:
     - 'scale'
     - 'deploy'
-    - 'sql-server-confluence-test'
+    - 'sql-server-confluence-prod'
     - '--replicas=1'
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
     - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'    
-
-# This step triggers the Prod Deployment
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: Trigger Prod
-  args:
-  - builds
-  - submit
-  - --config
-  - cloudbuild-prod.yaml
-  - --substitutions
-  - _SHORT_SHA=$SHORT_SHA
-  - .
