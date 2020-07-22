@@ -31,11 +31,11 @@ steps:
 
 # This step deploys to the Stage environment
 - name: 'gcr.io/cloud-builders/gke-deploy'
-  id: Deploy Stage
+  id: Deploy Test
   args:
   - run
   - --filename=test.yaml
-  - --image=gcr.io/$PROJECT_ID/sql-server-confluence:$_SHORT_SHA
+  - --image=gcr.io/$PROJECT_ID/sql-server-confluence:$SHORT_SHA
   - --output=/tmp/outputstage
   - --location=us-east1-b
   - --cluster=cluster-1  
@@ -61,5 +61,5 @@ steps:
   - --config
   - cloudbuild-prod.yaml
   - --substitutions
-  - _SHORT_SHA=$_SHORT_SHA
+  - _SHORT_SHA=$SHORT_SHA
   - .
