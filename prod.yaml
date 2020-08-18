@@ -1,24 +1,24 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: sql-server-confluence-prod
+  name: sql-server-location-prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sql-server-confluence-prod
+      app: sql-server-location-prod
   template:
     metadata:
       labels:
-        app: sql-server-confluence-prod
+        app: sql-server-location-prod
     spec:
       securityContext:
         runAsUser: 10001
         runAsGroup: 10001
         fsGroup: 10001
       containers:
-      - name: sql-server-confluence-prod
-        image: gcr.io/constellation-275522/sql-server-confluence
+      - name: sql-server-location-prod
+        image: gcr.io/constellation-275522/sql-server-location
         ports:
         - containerPort: 1433
           name: sql-server
@@ -30,7 +30,7 @@ spec:
         - name: SA_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: sql-server-confluence-prod
+              name: sql-server-location-prod
               key: SA_PASSWORD
         resources:
           limits:
@@ -40,7 +40,7 @@ spec:
             cpu: "2"
             memory: "2000Mi"
         volumeMounts:
-        - name: sql-server-confluence-prod
+        - name: sql-server-location-prod
           mountPath: /var/opt/mssql
         livenessProbe:
           tcpSocket:
@@ -50,14 +50,14 @@ spec:
         securityContext:
           privileged: true
       volumes:
-      - name: sql-server-confluence-prod
+      - name: sql-server-location-prod
         persistentVolumeClaim:
-          claimName: sql-server-confluence-prod
+          claimName: sql-server-location-prod
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sql-server-confluence-prod
+  name: sql-server-location-prod
 spec:
   accessModes:
     - ReadWriteOnce
@@ -68,16 +68,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sql-server-confluence-prod
+  name: sql-server-location-prod
   annotations:
     cloud.google.com/load-balancer-type: "Internal"
   labels:
-    app: sql-server-confluence-prod
+    app: sql-server-location-prod
 spec:
   ports:
   - port: 1433
-    name: sql-server-confluence-prod
+    name: sql-server-location-prod
   selector:
-    app: sql-server-confluence-prod
+    app: sql-server-location-prod
   type: LoadBalancer  
    
