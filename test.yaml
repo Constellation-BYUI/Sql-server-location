@@ -1,24 +1,24 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: sql-server-confluence-test
+  name: sql-server-location-test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sql-server-confluence-test
+      app: sql-server-location-test
   template:
     metadata:
       labels:
-        app: sql-server-confluence-test
+        app: sql-server-location-test
     spec:
       securityContext:
         runAsUser: 10001
         runAsGroup: 10001
         fsGroup: 10001
       containers:
-      - name: sql-server-confluence-test
-        image: gcr.io/constellation-275522/sql-server-confluence
+      - name: sql-server-location-test
+        image: gcr.io/constellation-275522/sql-server-location
         ports:
         - containerPort: 1433
           name: sql-server
@@ -30,7 +30,7 @@ spec:
         - name: SA_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: sql-server-confluence-test
+              name: sql-server-location-test
               key: SA_PASSWORD
         resources:
           limits:
@@ -40,7 +40,7 @@ spec:
             cpu: ".9"
             memory: "2000Mi"
         volumeMounts:
-        - name: sql-server-confluence-test
+        - name: sql-server-location-test
           mountPath: /var/opt/mssql
         livenessProbe:
           tcpSocket:
@@ -50,14 +50,14 @@ spec:
         securityContext:
           privileged: true
       volumes:
-      - name: sql-server-confluence-test
+      - name: sql-server-location-test
         persistentVolumeClaim:
-          claimName: sql-server-confluence-test
+          claimName: sql-server-location-test
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sql-server-confluence-test
+  name: sql-server-location-test
 spec:
   accessModes:
     - ReadWriteOnce
@@ -68,16 +68,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sql-server-confluence-test
+  name: sql-server-location-test
   annotations:
     cloud.google.com/load-balancer-type: "Internal"
   labels:
-    app: sql-server-confluence-test
+    app: sql-server-location-test
 spec:
   ports:
   - port: 1433
-    name: sql-server-confluence-test
+    name: sql-server-location-test
   selector:
-    app: sql-server-confluence-test
+    app: sql-server-location-test
   type: LoadBalancer  
    
