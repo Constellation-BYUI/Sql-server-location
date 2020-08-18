@@ -17,7 +17,7 @@ steps:
   id: Deploy Prod
   args:
   - run
-  - --filename=test.yaml
+  - --filename=prod.yaml
   - --image=gcr.io/$PROJECT_ID/sql-server-location:$_SHORT_SHA
   - --output=/tmp/outputstage
   - --location=us-east1-b
