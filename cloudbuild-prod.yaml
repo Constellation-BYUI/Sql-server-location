@@ -1,7 +1,7 @@
 steps:
 
 # This step stops the database pod
- - name: 'gcr.io/cloud-builders/kubectl'
+- name: 'gcr.io/cloud-builders/kubectl'
   id: Stop Pod
   args:
     - 'scale'
